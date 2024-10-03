@@ -60,9 +60,18 @@ jobs:
           else
             echo "PACKAGE_VERSION=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           fi
+      
+      - name: Check if release exists
+        id: check_release
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.PACKAGE_VERSION }})
+          echo "release_status=$response" >> $GITHUB_ENV
 
       - name: Create Github Release
         id: create_release
+        if: env.release_status != '200'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.targetPlatform }}/*.exe
+          asset_path: build/${{ matrix.targetPlatform }}/*
           asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
           asset_content_type: application/octet-stream
       
