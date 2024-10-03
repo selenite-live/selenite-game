@@ -53,16 +53,24 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
 
+      - name: Extract tag or branch name
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "PACKAGE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "PACKAGE_VERSION=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          fi
+
       - name: Create Github Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }} 🎮
+          tag_name: ${{ env.PACKAGE_VERSION }}
+          release_name: Release ${{ env.PACKAGE_VERSION }} 🎮
           body: | 
-            Release de la version ${{ github.ref }} pour Windows et macOS.
+            Release de la version ${{ env.PACKAGE_VERSION }} pour Windows et macOS.
           draft: false
           prerelease: false
         
@@ -73,5 +81,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/${{ matrix.targetPlatform }}
-          asset_name: build-${{ github.ref }}-${{ matrix.targetPlatform }}
+          asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
           asset_content_type: application/octet-stream
