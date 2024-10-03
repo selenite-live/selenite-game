@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - release
+    tags:
+      - 'v*'
   workflow_dispatch: 
 
 jobs:
-  buildForAllSupportedOS:
+  build:
+
     name: Build for ${{ matrix.targetPlatform }} 
     runs-on: ubuntu-latest
     strategy:
@@ -16,25 +19,59 @@ jobs:
         targetPlatform:
           - StandaloneOSX
           - StandaloneWindows64
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
-      - uses: actions/cache@v4
+
+      - name: Cache Unity files
+        uses: actions/cache@v4
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
-      - uses: game-ci/unity-builder@v4
+
+      - name: Build the game file with Unity
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with: 
           targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: ./
           unityVersion: 2022.3.42f1
-      - uses: actions/upload-artifact@v3
+
+      - name: Create artifact in the actions tab
+        uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
+
+      - name: Create Github Release
+        id: create_release
+        # if: startsWith(github.ref, 'refs/tags') && matrix.targetPlatform == 'StandaloneWindows64'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }} 🎮
+          body: | 
+            Release de la version ${{ github.ref }} pour Windows et macOS.
+          draft: false
+          prerelease: false
+        
+      - name: Upload ${{ matrix.targetPlatform }} build to release
+        # if: startsWith(github.ref, 'refs/tags')
+        uses: actions/upload-release-asset@v1
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/${{ matrix.targetPlatform }}
+          asset_name: build-${{ github.ref }}-${{ matrix.targetPlatform }}
+          asset_content_type: application/octet-stream
