@@ -9,21 +9,20 @@ on:
   workflow_dispatch: 
 
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  deployments: write
-  statuses: write
-  checks: write
   actions: write
-  repository-projects: write
-  security-events: write
+  attestations: write
+  checks: write
+  contents: write
+  deployments: write
   discussions: write
+  id-token: write
+  issues: write
   packages: write
   pages: write
-  workflows: write
-  members: write
-  metadata: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
 
 jobs:
   build:
