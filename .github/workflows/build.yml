@@ -74,6 +74,7 @@ jobs:
         with: 
           targetPlatform: ${{ matrix.targetPlatform }}
           unityVersion: 2022.3.42f1
+          allowDirtyBuild: true
 
       - name: Create artifact in the actions tab
         uses: actions/upload-artifact@v3
