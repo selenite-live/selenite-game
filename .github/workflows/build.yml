@@ -92,6 +92,9 @@ jobs:
           release_name: Release ${{ github.ref }} ${{ matrix.targetPlatform }} ${{ steps.buildnumber.outputs.build_number }}
           draft: false
           prerelease: false
+        
+      - name: Debug build folder content
+        run: ls -R build
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
