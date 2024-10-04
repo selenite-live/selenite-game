@@ -26,6 +26,8 @@ jobs:
   init-data:
     name: Set the workflow data 📊
     runs-on: ubuntu-latest
+    outputs:
+      builder_number: ${{ steps.builder_number.outputs.build_number }}
     steps:
       - name: Get the number of the current build
         id: builder_number
