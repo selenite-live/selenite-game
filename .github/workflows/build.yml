@@ -136,7 +136,7 @@ jobs:
           prerelease: false
       
       - name: Download the Windows build from the artifact 🪟
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
 
