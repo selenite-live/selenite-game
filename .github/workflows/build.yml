@@ -55,10 +55,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-build-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-build-${{ matrix.targetPlatform }}-
-            Library-build-
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
 
       - name: Get a random id for the build
         id: buildnumber
