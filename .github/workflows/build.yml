@@ -40,7 +40,7 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneOSX
-          # - StandaloneWindows64
+          - StandaloneWindows64
 
     outputs:
         buildVersion: ${{ steps.buildnumber.outputs.build_number }}
@@ -58,7 +58,7 @@ jobs:
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
 
-      - name: Get a random id for the build
+      - name: Get an ID for the build
         id: buildnumber
         uses: einaregilsson/build-number@v3
         with:
@@ -108,5 +108,5 @@ jobs:
         with: 
             upload_url: ${{ steps.create_release.outputs.upload_url }}
             asset_path: build/build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}.zip
-            asset_name: build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}
+            asset_name: Release for ${{ matrix.targetPlatform == 'StandaloneOSX' && 'MacOS' || 'Windows' }} (build-${{ steps.buildnumber.outputs.build_number }}).zip
             asset_content_type: application/zip
