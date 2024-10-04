@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - release
-    tags:
-      - 'v*'
-  workflow_dispatch: 
+  release:
+    types:
+        - published
+  workflow_dispatch:
+    inputs:
+        workflow_mode:
+            description: '[release] [StandaloneWindows64, StandaloneOSX]'
+            required: false
+            default: ''
 
 permissions:
   actions: write
@@ -35,22 +41,33 @@ jobs:
         targetPlatform:
           - StandaloneOSX
           # - StandaloneWindows64
+
+    outputs:
+        buildVersion: ${{ steps.buildnumber.outputs.build_number }}
     
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          lfs: true
 
       - name: Cache Unity files
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-build-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-build-${{ matrix.targetPlatform }}-
+            Library-build-
 
-      - name: Build the game file with Unity
+      - name: Get a random id for the build
+        id: buildnumber
+        uses: einaregilsson/build-number@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+            
+
+      - name: Build Unity Project
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -58,63 +75,31 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with: 
           targetPlatform: ${{ matrix.targetPlatform }}
-          projectPath: ./
           unityVersion: 2022.3.42f1
 
       - name: Create artifact in the actions tab
         uses: actions/upload-artifact@v3
         with:
-          name: Build-${{ matrix.targetPlatform }}
+          name: build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}
           path: build/${{ matrix.targetPlatform }}
 
-      - name: Extract tag or branch name
-        run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo "PACKAGE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          else
-            echo "PACKAGE_VERSION=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          fi
-      
-      - name: Check if release exists
-        id: check_release
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.PACKAGE_VERSION }})
-          echo "release_status=$response" >> $GITHUB_ENV
-
-      - name: Create Github Release
+      - name: Create GitHub Release
         id: create_release
-        if: env.release_status != '200'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.PACKAGE_VERSION }}
-          release_name: Release ${{ env.PACKAGE_VERSION }} 🎮
-          body: | 
-            Release de la version ${{ env.PACKAGE_VERSION }} pour Windows et macOS.
+          tag_name: ${{ github.ref }}-${{ matrix.targetPlatform }}
+          release_name: Release ${{ github.ref }} ${{ matrix.targetPlatform }} ${{ steps.buildnumber.outputs.build_number }}
           draft: false
           prerelease: false
-        
-      # - name: Upload Windows build to release
-      #   if: matrix.targetPlatform == 'StandaloneWindows64'
-      #   uses: actions/upload-release-asset@v1
-      #   env: 
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: build/Build-${{ matrix.targetPlatform }}/${{ matrix.targetPlatform }}.exe
-      #     asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
-      #     asset_content_type: application/octet-stream
-      
-      - name: Upload MacOsX build to release
-        if: matrix.targetPlatform == 'StandaloneOSX'
+
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
-        env: 
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.targetPlatform }}
-          asset_name: Build-${{ matrix.targetPlatform }}
-          asset_content_type: application/octet-stream
+        with: 
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: build/${{ matrix.targetPlatform }}
+            asset_name: build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}
+            asset_content_type: application/zip
