@@ -8,7 +8,22 @@ on:
       - 'v*'
   workflow_dispatch: 
 
-permissions: write-all
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  deployments: write
+  statuses: write
+  checks: write
+  actions: write
+  repository-projects: write
+  security-events: write
+  discussions: write
+  packages: write
+  pages: write
+  workflows: write
+  members: write
+  metadata: write
 
 jobs:
   build:
@@ -20,7 +35,7 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneOSX
-          - StandaloneWindows64
+          # - StandaloneWindows64
     
     steps:
       - name: Checkout the repository
