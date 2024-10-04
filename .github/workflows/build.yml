@@ -90,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.targetPlatform }}.zip
+          asset_path: build/${{ matrix.targetPlatform }}.exe
           asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
           asset_content_type: application/octet-stream
       
@@ -101,6 +101,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.targetPlatform }}.zip
+          asset_path: build/${{ matrix.targetPlatform }}.app
           asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
           asset_content_type: application/octet-stream
