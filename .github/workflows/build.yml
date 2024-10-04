@@ -92,6 +92,11 @@ jobs:
           release_name: Release ${{ github.ref }} ${{ matrix.targetPlatform }} ${{ steps.buildnumber.outputs.build_number }}
           draft: false
           prerelease: false
+
+      - name: Make a ZIP archive of the build folder
+        uses: montudor/action-zip@v1
+        with:
+            args: zip -qq -r build/build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}.zip build/${{ matrix.targetPlatform }}
         
       - name: Debug build folder content
         run: ls -R build
@@ -102,6 +107,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with: 
             upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: build/${{ matrix.targetPlatform }}
+            asset_path: build/build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}.zip
             asset_name: build-${{ matrix.targetPlatform }}-${{ steps.buildnumber.outputs.build_number }}
             asset_content_type: application/zip
