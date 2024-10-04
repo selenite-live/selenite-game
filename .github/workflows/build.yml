@@ -120,7 +120,7 @@ jobs:
   publishAsRelease:
     name: Publish the build as a release 🚀
     runs-on: ubuntu-latest
-    needs: [buildWindows, buildMacOs]
+    needs: [buildWindows, buildMacOs, init-data]
     steps:
       - name: Create a release 📦
         id: create_release
