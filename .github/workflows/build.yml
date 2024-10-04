@@ -66,16 +66,16 @@ jobs:
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
 
-      - name: Upload the build 📤
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}
-          path: build/StandaloneWindows64
-
       - name: Zip the build 📦
         uses: montudor/action-zip@v1
         with:
           args: zip qq -r build/build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip build/StandaloneWindows64
+
+      - name: Upload the build 📤
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          path: build/StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
 
   buildMacOs:
     name: Build the game for MacOsX 🍏
@@ -108,16 +108,16 @@ jobs:
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
 
-      - name: Upload the build 📤
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}
-          path: build/StandaloneOSX
-
       - name: Zip the build 📦
         uses: montudor/action-zip@v1
         with:
           args: zip qq -r build/build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip build/StandaloneOSX
+
+      - name: Upload the zip file 📤
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
+          path: build/build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
 
   publishAsRelease:
     name: Publish the build as a release 🚀
@@ -134,6 +134,11 @@ jobs:
           release_name: Release ${{ needs.init-data.outputs.builder_number }}
           draft: false
           prerelease: false
+      
+      - name: Download the Windows build from the artifact 🪟
+        uses: actions/download-artifact@v2
+        with:
+          name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
 
       - name: Upload Windows build 🪟
         uses: actions/upload-release-asset@v1
@@ -141,9 +146,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_path: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
           asset_name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
           asset_content_type: application/zip
+
+      - name: Download the MacOs build from the artifact 🍏
+        uses: actions/download-artifact@v2
+        with:
+          name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
 
       - name: Upload MacOs build 🍏
         uses: actions/upload-release-asset@v1
@@ -151,7 +161,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_path: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
           asset_name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
           asset_content_type: application/zip
 
