@@ -97,16 +97,16 @@ jobs:
           draft: false
           prerelease: false
         
-      - name: Upload Windows build to release
-        if: matrix.targetPlatform == 'StandaloneWindows64'
-        uses: actions/upload-release-asset@v1
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/Build-${{ matrix.targetPlatform }}/${{ matrix.targetPlatform }}.exe
-          asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
-          asset_content_type: application/octet-stream
+      # - name: Upload Windows build to release
+      #   if: matrix.targetPlatform == 'StandaloneWindows64'
+      #   uses: actions/upload-release-asset@v1
+      #   env: 
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: build/Build-${{ matrix.targetPlatform }}/${{ matrix.targetPlatform }}.exe
+      #     asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
+      #     asset_content_type: application/octet-stream
       
       - name: Upload MacOsX build to release
         if: matrix.targetPlatform == 'StandaloneOSX'
@@ -115,6 +115,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/${{ matrix.targetPlatform }}/${{ matrix.targetPlatform }}.app
-          asset_name: build-${{ env.PACKAGE_VERSION }}-${{ matrix.targetPlatform }}
+          asset_path: build/${{ matrix.targetPlatform }}
+          asset_name: Build-${{ matrix.targetPlatform }}
           asset_content_type: application/octet-stream
