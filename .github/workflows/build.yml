@@ -69,7 +69,7 @@ jobs:
       - name: Upload the build 📤
         uses: actions/upload-artifact@v3
         with:
-          name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          name: build-StandaloneWindows64
           path: build/StandaloneWindows64
 
   buildMacOs:
@@ -106,7 +106,7 @@ jobs:
       - name: Upload the zip file 📤
         uses: actions/upload-artifact@v3
         with:
-          name: build-StandaloneOSX-${{ steps.buildnumber.outputs.build_number }}.zip
+          name: build-StandaloneOSX
           path: build/StandaloneOSX
 
   publishAsRelease:
@@ -128,7 +128,18 @@ jobs:
       - name: Download the Windows build from the artifact 🪟
         uses: actions/download-artifact@v4
         with:
-          name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          name: build-StandaloneWindows64
+
+      - name: Download the MacOs build from the artifact 🍏
+        uses: actions/download-artifact@v4
+        with:
+          name: build-StandaloneOSX
+
+      - name: Debug & show the files 📂
+        run: |
+          ls -la
+          ls -la build-StandaloneWindows64
+          ls -la build-StandaloneOSX
 
       - name: Upload Windows build 🪟
         uses: actions/upload-release-asset@v1
@@ -139,11 +150,6 @@ jobs:
           asset_path: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
           asset_name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
           asset_content_type: application/zip
-
-      - name: Download the MacOs build from the artifact 🍏
-        uses: actions/download-artifact@v4
-        with:
-          name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
 
       - name: Upload MacOs build 🍏
         uses: actions/upload-release-asset@v1
