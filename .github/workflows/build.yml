@@ -65,6 +65,9 @@ jobs:
           targetPlatform: StandaloneWindows64
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
+      
+      - name: Debug build folder content
+        run: ls -R build
 
       - name: Upload the build 📤
         uses: actions/upload-artifact@v3
@@ -102,6 +105,9 @@ jobs:
           targetPlatform: StandaloneOSX
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
+
+      - name: Debug build folder content
+        run: ls -R build
 
       - name: Upload the zip file 📤
         uses: actions/upload-artifact@v3
