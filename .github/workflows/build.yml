@@ -28,12 +28,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       builder_number: ${{ steps.builder_number.outputs.build_number }}
+      date: ${{ steps.set_date.outputs.date }}
     steps:
       - name: Get the number of the current build
         id: builder_number
         uses: einaregilsson/build-number@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get the current date for the build name
+        id: set_date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
 
   buildWindows:
     name: Build the game for Windows 🪟
@@ -65,6 +70,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
+          buildName: "Selenite: Lost Contact - build-${{ needs.init-data.outputs.builder_number }}-${{ needs.init-data.outputs.date }}"
       
       - name: Debug build folder content
         run: ls -R
@@ -113,6 +119,7 @@ jobs:
           targetPlatform: StandaloneOSX
           unityVersion: 2022.3.42f1
           allowDirtyBuild: true
+          buildName: "Selenite: Lost Contact - build-${{ needs.init-data.outputs.builder_number }}-${{ needs.init-data.outputs.date }}"
 
       - name: Debug build folder content
         run: ls -R
@@ -145,8 +152,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ needs.init-data.outputs.builder_number }}
-          release_name: Release ${{ needs.init-data.outputs.builder_number }}
+          tag_name: build-${{ needs.init-data.outputs.builder_number }}
+          release_name: "Selenite: Lost Contact - Build Numéro ${{ needs.init-data.outputs.builder_number }} - ${{ needs.init-data.outputs.date }}"
           draft: false
           prerelease: false
       
@@ -170,7 +177,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: StandaloneWindows64.zip
-          asset_name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_name: "Selenite: Lost contact - Windows Standalone - Build Numéro ${{ needs.init-data.outputs.builder_number }}.zip"
           asset_content_type: application/zip
 
       - name: Upload MacOs build 🍏
@@ -180,19 +187,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: StandaloneOSX.zip
-          asset_name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_name: "Selenite: Lost contact - MacOs Standalone - Build Numéro ${{ needs.init-data.outputs.builder_number }}.zip"
           asset_content_type: application/zip
-
-      - name: Publish the release 🚀
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: build-${{ needs.init-data.outputs.builder_number }}
-          release_name: Release ${{ needs.init-data.outputs.builder_number }}
-          draft: false
-          prerelease: false
-          body: |
-            This is the release of the game.
-            You can download the game for Windows and MacOsX.
-            Enjoy! 🎮
