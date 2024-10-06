@@ -69,11 +69,10 @@ jobs:
       - name: Debug build folder content
         run: ls -R build
 
-      - name: Give the right to zip the build folder
-        run: chmod -R 777 build
-
       - name: Zip the build folder 📦
-        run: zip -r build/StandaloneWindows64.zip build/StandaloneWindows64
+        uses: montudor/action-zip@v1
+        with: 
+          args: zip qq -r build/StandaloneWindows64.zip build/StandaloneWindows64
 
       - name: Upload the build 📤
         uses: actions/upload-artifact@v4
@@ -115,11 +114,10 @@ jobs:
       - name: Debug build folder content
         run: ls -R build
 
-      - name: Give the right to zip the build folder
-        run: chmod -R 777 build
-
       - name: Zip the build folder 📦
-        run: zip -r build/StandaloneOSX.zip build/StandaloneOSX
+        uses: montudor/action-zip@v1
+        with: 
+          args: zip qq -r build/StandaloneOSX.zip build/StandaloneOSX
 
       - name: Upload the zip file 📤
         uses: actions/upload-artifact@v4
