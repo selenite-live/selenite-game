@@ -72,7 +72,7 @@ jobs:
       - name: Zip the build folder 📦
         uses: montudor/action-zip@v1
         with: 
-          args: zip qq -r StandaloneWindows64.zip build/StandaloneWindows64
+          args: zip -qq -r StandaloneWindows64.zip build/StandaloneWindows64
 
       - name: Debug & show the files 📂
         run: ls -R 
@@ -120,7 +120,7 @@ jobs:
       - name: Zip the build folder 📦
         uses: montudor/action-zip@v1
         with: 
-          args: zip qq -r StandaloneOSX.zip build/StandaloneOSX
+          args: zip -qq -r StandaloneOSX.zip build/StandaloneOSX
 
       - name: Debug & show the files 📂
         run: ls -R 
