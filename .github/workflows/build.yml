@@ -69,11 +69,14 @@ jobs:
       - name: Debug build folder content
         run: ls -R build
 
+      - name: Zip the build folder 📦
+        run: zip -r build/StandaloneWindows64.zip build/StandaloneWindows64
+
       - name: Upload the build 📤
         uses: actions/upload-artifact@v4
         with:
           name: build-StandaloneWindows64
-          path: build/StandaloneWindows64
+          path: build/StandaloneWindows64.zip
 
   buildMacOs:
     name: Build the game for MacOsX 🍏
@@ -109,11 +112,14 @@ jobs:
       - name: Debug build folder content
         run: ls -R build
 
+      - name: Zip the build folder 📦
+        run: zip -r build/StandaloneOSX.zip build/StandaloneOSX
+
       - name: Upload the zip file 📤
         uses: actions/upload-artifact@v4
         with:
           name: build-StandaloneOSX
-          path: build/StandaloneOSX
+          path: build/StandaloneOSX.zip
 
   publishAsRelease:
     name: Publish the build as a release 🚀
@@ -145,10 +151,7 @@ jobs:
           name: build-StandaloneOSX
 
       - name: Debug & show the files 📂
-        run: |
-          ls -la
-          ls -la build-StandaloneWindows64
-          ls -la build-StandaloneOSX
+        run: ls -la
 
       - name: Upload Windows build 🪟
         uses: actions/upload-release-asset@v1
@@ -156,7 +159,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_path: StandaloneWindows64.zip
           asset_name: build-StandaloneWindows64-${{ needs.init-data.outputs.builder_number }}.zip
           asset_content_type: application/zip
 
@@ -166,7 +169,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
+          asset_path: StandaloneOSX.zip
           asset_name: build-StandaloneOSX-${{ needs.init-data.outputs.builder_number }}.zip
           asset_content_type: application/zip
 
