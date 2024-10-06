@@ -74,6 +74,9 @@ jobs:
         with: 
           args: zip qq -r build/StandaloneWindows64.zip build/StandaloneWindows64
 
+      - name: Debug & show the files 📂
+        run: ls -R build
+
       - name: Upload the build 📤
         uses: actions/upload-artifact@v4
         with:
@@ -118,6 +121,9 @@ jobs:
         uses: montudor/action-zip@v1
         with: 
           args: zip qq -r build/StandaloneOSX.zip build/StandaloneOSX
+
+      - name: Debug & show the files 📂
+        run: ls -R build
 
       - name: Upload the zip file 📤
         uses: actions/upload-artifact@v4
