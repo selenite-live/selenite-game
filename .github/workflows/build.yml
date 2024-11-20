@@ -152,8 +152,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: build-${{ needs.init-data.outputs.builder_number }}
-          release_name: "Selenite: Lost Contact - Build Numéro ${{ needs.init-data.outputs.builder_number }} - ${{ needs.init-data.outputs.date }}"
+          tag_name: build-0.0.${{ needs.init-data.outputs.builder_number }}
+          release_name: "v0.0.${{ needs.init-data.outputs.builder_number }}"
+          body: |
+            Selenite : Lost Contact
+            > Release v0.0.${{ needs.init-data.outputs.builder_number }} / ${{ needs.init-data.outputs.date }} 🚀
           draft: false
           prerelease: false
       
@@ -177,7 +180,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: StandaloneWindows64.zip
-          asset_name: "Selenite: Lost contact - Windows Standalone - Build Numéro ${{ needs.init-data.outputs.builder_number }}.zip"
+          asset_name: "selenite-lost-contact-windows.zip"
           asset_content_type: application/zip
 
       - name: Upload MacOs build 🍏
@@ -187,5 +190,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: StandaloneOSX.zip
-          asset_name: "Selenite: Lost contact - MacOs Standalone - Build Numéro ${{ needs.init-data.outputs.builder_number }}.zip"
+          asset_name: "selenite-lost-contact-macos.zip"
           asset_content_type: application/zip
