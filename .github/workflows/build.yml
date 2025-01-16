@@ -1,0 +1,194 @@
+name: Build the game Windows & MaxOsX 🎮
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  attestations: write
+  checks: write
+  contents: write
+  deployments: write
+  discussions: write
+  id-token: write
+  issues: write
+  packages: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+
+jobs:
+  init-data:
+    name: Set the workflow data 📊
+    runs-on: ubuntu-latest
+    outputs:
+      builder_number: ${{ steps.builder_number.outputs.build_number }}
+      date: ${{ steps.set_date.outputs.date }}
+    steps:
+      - name: Get the number of the current build
+        id: builder_number
+        uses: einaregilsson/build-number@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get the current date for the build name
+        id: set_date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+
+  buildWindows:
+    name: Build the game for Windows 🪟
+    runs-on: ubuntu-latest
+    needs: init-data
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout the code 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get Unity Cache 🗄️
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+
+      - name: Build Unity Project for Windows 🪟
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          unityVersion: 2022.3.42f1
+          allowDirtyBuild: true
+          buildName: "Selenite: Lost Contact - build-${{ needs.init-data.outputs.builder_number }}-${{ needs.init-data.outputs.date }}"
+      
+      - name: Debug build folder content
+        run: ls -R
+
+      - name: Zip the build folder 📦
+        uses: montudor/action-zip@v1
+        with: 
+          args: zip -qq -r StandaloneWindows64.zip build/StandaloneWindows64
+
+      - name: Debug & show the files 📂
+        run: ls -R 
+
+      - name: Upload the build 📤
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-StandaloneWindows64
+          path: StandaloneWindows64.zip
+
+  buildMacOs:
+    name: Build the game for MacOsX 🍏
+    runs-on: ubuntu-latest
+    needs: init-data
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout the code 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get Unity Cache 🗄️
+        uses: actions/cache@v4
+        with:
+            path: Library
+            key: Library-${{ matrix.targetPlatform }}
+            restore-keys: Library-
+
+      - name: Build Unity Project for MacOsX 🍏
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneOSX
+          unityVersion: 2022.3.42f1
+          allowDirtyBuild: true
+          buildName: "Selenite: Lost Contact - build-${{ needs.init-data.outputs.builder_number }}-${{ needs.init-data.outputs.date }}"
+
+      - name: Debug build folder content
+        run: ls -R
+
+      - name: Zip the build folder 📦
+        uses: montudor/action-zip@v1
+        with: 
+          args: zip -qq -r StandaloneOSX.zip build/StandaloneOSX
+
+      - name: Debug & show the files 📂
+        run: ls -R 
+
+      - name: Upload the zip file 📤
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-StandaloneOSX
+          path: StandaloneOSX.zip
+
+  publishAsRelease:
+    name: Publish the build as a release 🚀
+    runs-on: ubuntu-latest
+    needs: 
+      - buildWindows
+      - buildMacOs
+      - init-data
+    steps:
+      - name: Create a release 📦
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: build-0.0.${{ needs.init-data.outputs.builder_number }}
+          release_name: "v0.0.${{ needs.init-data.outputs.builder_number }}"
+          body: |
+            Selenite : Lost Contact
+            > Release v0.0.${{ needs.init-data.outputs.builder_number }} / ${{ needs.init-data.outputs.date }} 🚀
+          draft: false
+          prerelease: false
+      
+      - name: Download the Windows build from the artifact 🪟
+        uses: actions/download-artifact@v4
+        with:
+          name: build-StandaloneWindows64
+
+      - name: Download the MacOs build from the artifact 🍏
+        uses: actions/download-artifact@v4
+        with:
+          name: build-StandaloneOSX
+
+      - name: Debug & show the files 📂
+        run: ls -la
+
+      - name: Upload Windows build 🪟
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: StandaloneWindows64.zip
+          asset_name: "selenite-lost-contact-windows.zip"
+          asset_content_type: application/zip
+
+      - name: Upload MacOs build 🍏
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: StandaloneOSX.zip
+          asset_name: "selenite-lost-contact-macos.zip"
+          asset_content_type: application/zip
