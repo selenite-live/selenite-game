@@ -1722,6 +1722,11 @@ PrefabInstance:
       propertyPath: hpText
       value: 
       objectReference: {fileID: 1354540859}
+    - target: {fileID: 5416342829251717679, guid: c83e7df3bff5546ddbc8d2fc8c5ede02,
+        type: 3}
+      propertyPath: far clip plane
+      value: 10000
+      objectReference: {fileID: 0}
     - target: {fileID: 6455812498713362132, guid: c83e7df3bff5546ddbc8d2fc8c5ede02,
         type: 3}
       propertyPath: m_Name
